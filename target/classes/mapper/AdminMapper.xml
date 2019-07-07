@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxy.tspaceX.dao.AdminDao">
+
+	<select id="selectAdminByAdminname" resultType="com.yxy.tspaceX.bean.Admin">
+		SELECT * FROM admin WHERE adminname=#{adminname}
+	</select>
+	
+	<select id="selectPadAdminByPadAdminname" resultType="map">
+		SELECT * FROM padadmin WHERE padadminname=#{padadminname}
+	</select>
+	
+	<select id="selectCountOfPassApplicationByCondition" resultType="int">
+		SELECT COUNT(*) FROM application WHERE idroom=#{idroom} AND state=0 AND password=#{password} AND starttime&lt;#{now} AND endtime&gt;#{now}
+	</select>
+	
+	<select id="selectRoomListForPad" resultType="map">
+		SELECT room.idroom, room.nameroom FROM room WHERE room.nameroom IS NOT NULL
+	</select>
+	
+	<insert id="insertWebData">
+		INSERT INTO count (idcount, totalcount, counttype, countdate) VALUES(null, #{totalcount}, #{counttype}, #{countdate})
+	</insert>
+
+</mapper>

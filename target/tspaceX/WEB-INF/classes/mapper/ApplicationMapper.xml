@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxy.tspaceX.dao.ApplicationDao">
+    
+    <select id="selectRunningApplication" resultType="map">
+    	<!-- applicant可作为外键与user表的mobile相联系 -->
+		SELECT ap.*, room.nameroom, room.pictureroom FROM (SELECT * FROM application WHERE application.applicant=#{applicant} AND application.endtime&gt;#{now} AND application.state&lt;&gt;1 AND application.state&lt;&gt;3) AS ap LEFT JOIN room ON ap.idroom = room.idroom ORDER BY ap.applytime
+    </select>
+    
+    <select id="selectPastApplication" resultType="map">
+    	SELECT ap.*, room.nameroom, room.pictureroom FROM (SELECT * FROM application WHERE application.applicant=#{applicant} AND (application.endtime&lt;#{now} OR application.state=1 OR application.state=3)) AS ap LEFT JOIN room ON ap.idroom = room.idroom ORDER BY ap.applytime DESC LIMIT 0, 20
+    </select>
+    
+    <!-- 检查申请的日期是否已有申请 -->
+    <select id="selectApplicationCountByDate" resultType="int">
+    	SELECT COUNT(*) FROM application WHERE applicant=#{applicant} AND state&lt;&gt;1 AND state&lt;&gt;3 AND starttime&gt;#{thisday} AND starttime&lt;#{nextday}
+    </select>
+    
+    <select id="selectApplicationById" resultType="map">
+		SELECT ap.*, room.nameroom, room.pictureroom, user.name FROM (SELECT * FROM application WHERE application.idapplication=#{idapplication}) AS ap LEFT JOIN room ON ap.idroom = room.idroom LEFT JOIN user ON ap.applicant = user.mobile  
+    </select>
+    
+    <insert id="insertApplication">
+    	INSERT INTO application (idapplication,idroom,starttime,endtime,applicant,participants,reason,state,applytime,audittime,password) VALUES(#{idapplication},#{idroom},#{starttime},#{endtime},#{applicant},#{participants},#{reason},#{state},#{applytime},#{audittime},#{password})
+    </insert>
+    
+    <select id="updateApplicationStateAccept" statementType="CALLABLE">
+    	{
+    		CALL acceptapplication(
+    			#{idapplication, mode=IN}, 
+    			#{password, mode=IN}, 
+    			#{result, mode=OUT, jdbcType=INTEGER}
+    		)
+    	}
+    </select>
+    
+    <update id="updateApplicationStateDecline">
+		UPDATE application SET state=1 WHERE idapplication=#{idapplication} AND state=2   
+    </update>
+    
+    <update id="updateApplicationStateCancel">
+    	UPDATE application SET state=3 WHERE idapplication=#{idapplication} AND applicant=#{applicant} AND state=2
+    </update>
+    
+    <select id="selectUnsettleApplicationBySection" resultType="map">
+    	SELECT ap.*, room.nameroom, user.username, user.name FROM (SELECT * FROM application WHERE state=2 AND starttime>#{now}) AS ap LEFT JOIN room ON ap.idroom = room.idroom LEFT JOIN user ON ap.applicant = user.mobile ORDER BY ap.idroom, ap.starttime, ap.endtime LIMIT #{start},#{size}
+    </select>
+    
+    <select id="selectCountOfUnsettleApplication" resultType="int">
+    	SELECT COUNT(*) FROM application WHERE state=2 AND starttime>#{now}
+    </select>
+    
+    <update id="updateBlackListApplicationStateDecline">
+    	UPDATE application SET state=1 WHERE applicant=#{applicant} AND state=2
+    </update>
+
+    
+</mapper>

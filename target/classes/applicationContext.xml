@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:aop="http://www.springframework.org/schema/aop"
+xmlns:tx="http://www.springframework.org/schema/tx"
+xmlns:context="http://www.springframework.org/schema/context"
+xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+	
+	<!-- 设置自动注解扫描，Spring和SpringMVC都要加注解 -->
+	<!-- 在任意一个中加注解扫描，都可以扫描到Controller，Service，Component，Repository -->
+	<!-- SpringMVC中有@RequestMapping等注解配置请求映射，由SpringMVC子容器加载Controller -->
+	<context:component-scan base-package="com.yxy.tspaceX"></context:component-scan>
+	<!-- 添加事务注解 -->
+	<!-- Spring中有@Transactional注解配置事务，需要特别配置，由Spring父容器加载Service -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+	<!-- 设置邮件发送服务-start -->
+	<!-- 设置发送邮件的线程池-start -->
+	<bean id="mailServiceExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<!-- 最少线程未满，使用最少线程处理 -->
+		<!-- 最少线程全部忙碌，将任务存放在队列中 -->
+		<!-- 队列满，开启新的线程处理队列中的任务 -->
+		<!-- 最大线程满，使用拒绝策略处理 -->
+		<!-- 最少线程数量 -->
+		<property name="corePoolSize" value="5"></property>
+		<!-- 最多线程数量 -->
+		<property name="maxPoolSize" value="10"></property>
+		<!-- 空闲线程存活时间 -->
+		<property name="keepAliveSeconds" value="200"></property>
+		<!-- 队列容量 -->
+		<property name="queueCapacity" value="20"></property>
+		<!-- 拒绝策略 -->
+		<property name="rejectedExecutionHandler">
+			<bean class="java.util.concurrent.ThreadPoolExecutor$AbortPolicy"></bean>
+		</property>
+	</bean>
+	<!-- 设置发送邮件的线程池-end -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.163.com"></property>
+		<property name="port" value="465"></property>
+		<property name="protocol" value="smtp"></property>
+		<property name="username" value="tspaceofficial@163.com"></property>
+		<property name="password" value="tspace0"></property>
+		<property name="defaultEncoding" value="UTF-8"></property>
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+				<!-- 设置发送邮件超时时间为300000毫秒 -->
+				<prop key="mail.smtp.timeout">300000</prop>
+				<!-- 设置smtp邮件端口465，SMTP加SSL层 -->
+				<prop key="mail.smtp.port">465</prop>
+				<prop key="mail.smtp.socketFactory.port">465</prop>
+				<!-- fallback -->
+				<prop key="mail.smtp.socketFactory.fallback">false</prop>
+				<!-- 设置SSL层的类 -->
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="simpleMessage" class="org.springframework.mail.SimpleMailMessage" scope="prototype">
+		<property name="to" value="tspaceofficial@163.com"></property>
+		<property name="from" value="tspaceofficial@163.com"></property>
+		<property name="subject" value="tspace客服"></property>
+	</bean>
+	<!-- 设置邮件发送服务-end -->
+	
+	<!-- 设置druid数据库连接池-start -->
+	<context:property-placeholder location="classpath:druid.properties" />
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 驱动类名 -->
+		<property name="driverClassName" value="${druid.driverClassName}"></property>
+		<!-- 访问数据库的url -->
+		<property name="url" value="${druid.url}"></property>
+		<!-- 登录用户名 -->
+		<property name="username" value="${druid.username}"></property>
+		<!-- 登陆密码 -->
+		<property name="password" value="${druid.password}"></property>
+		<!-- 初始连接数 -->
+		<property name="initialSize" value="${druid.initialSize}"></property>
+		<!-- 最小空闲连接数 -->
+		<property name="minIdle" value="${druid.minIdle}"></property>
+		<!-- 最大活跃连接数 -->
+		<property name="maxActive" value="${druid.maxActive}"></property>
+		<!-- 最大等待时间，超过这个时间，大于最小空闲连接数的空闲连接就会被关闭 -->
+		<property name="maxWait" value="${druid.maxWait}"></property>
+		<!-- 连接逃脱的时间 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"></property>
+		<!-- 最小的可逃脱空闲时间 -->
+		<property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"></property>
+		<!-- 检测连接是否有效的SQL QUERY语句 -->
+		<property name="validationQuery" value="${druid.validationQuery}"></property>
+		<!-- 是否对空闲连接进行测试 -->
+		<property name="testWhileIdle" value="${druid.testWhileIdle}"></property>
+		<property name="testOnBorrow" value="${druid.testOnBorrow}"></property>
+		<property name="testOnReturn" value="${druid.testOnReturn}"></property>
+		<!--  -->
+		<property name="poolPreparedStatements" value="${druid.poolPreparedStatements}"></property>
+		<!--  -->
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="${druid.maxPoolPreparedStatementPerConnectionSize}"></property>
+		<!-- 过滤器 -->
+		<property name="filters" value="${druid.filters}"></property>
+	</bean>
+	<!-- 设置druid数据库连接池-end -->
+	
+	<!-- 整合MyBatis-start -->
+	<!-- 设置Spring进行事务管理 -->
+	<bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- 选择事务管理的数据源 -->
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<!-- 设置Mybatis的SqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 设置数据源 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 设置Mybatis配置文件 -->
+		<property name="configLocation" value="classpath:MyBatisConfig.xml"></property>
+		<!-- 设置Mapper路径 -->
+		<property name="mapperLocations" value="classpath:mapper/*Mapper.xml"></property>
+	</bean>
+	<!-- 设置Mappers自动扫描 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 注入sqlSessionFactroy -->
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+		<!-- 设置Mappers -->
+		<property name="basePackage" value="com.yxy.tspaceX.dao"></property>
+	</bean>
+	<!-- 整合MyBatis-end -->
+</beans>

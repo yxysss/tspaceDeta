@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace对应实现的接口类，便于扫描映射 -->
+<mapper namespace="com.yxy.tspaceX.dao.SchoolDao">
+	
+	<!-- id: statement的id -->
+	<select id="selectAllSchools" resultType="com.yxy.tspaceX.bean.School">
+		SELECT * FROM school
+	</select>
+	
+	<select id="selectAllRoomType" resultType="map">
+		SELECT * FROM roomtype
+	</select>
+	
+</mapper>

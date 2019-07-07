@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxy.tspaceX.dao.RoomDao">
+	
+	<!-- id: statement的id -->
+	<select id="selectAllRooms" resultType="map">
+		SELECT ro.*, school.schoolname, roomtype.typename FROM (SELECT * FROM room where nameroom IS NOT NULL) AS ro LEFT JOIN school ON school.idschool = ro.schoolroom LEFT JOIN roomtype ON roomtype.idroomtype = ro.typeroom
+	</select>
+	
+	<select id="selectTodayDateForDailyUpdate" resultType="date">
+		SELECT room.todaydate FROM room LIMIT 0,1
+	</select>
+	
+	<!-- parameterType: 输入参数的java类型，可省略 -->
+	<!-- resultType: 输出结果所映射的java对象类型 -->
+	<!-- #{id}: id为接收输入参数，如果参数是简单类型，参数名可以任意 -->
+	<select id="selectRoomById" parameterType="Integer" resultType="map">
+		SELECT ro.*, school.schoolname, roomtype.typename FROM (SELECT * FROM room WHERE idroom=#{idroom} AND nameroom IS NOT NULL) AS ro LEFT JOIN school ON school.idschool = ro.schoolroom LEFT JOIN roomtype ON roomtype.idroomtype = ro.typeroom
+	</select>
+	
+	<select id="selectRoomAvailableById" resultType="string">
+		SELECT room.availableroom FROM room WHERE idroom=#{idroom} AND nameroom IS NOT NULL
+	</select>
+	
+	<insert id="insertRoom" useGeneratedKeys="true" keyProperty="idroom">
+		INSERT INTO room (idroom,nameroom,addressroom,schoolroom,capacityroom,typeroom,descriptionroom,pictureroom,thumbnailroom,availableroom,todayroom,todaydate) VALUES(#{idroom},#{nameroom},#{addressroom},#{schoolroom},#{capacityroom},#{typeroom},#{descriptionroom},#{pictureroom},#{thumbnailroom},#{availableroom},#{todayroom},#{todaydate})	
+	</insert>
+	
+	<select id="selectUpdateRoom" resultType="map">
+		SELECT room.idroom, room.availableroom, room.todayroom FROM room WHERE todaydate&lt;&gt;#{todaydate}
+	</select>
+	
+	<update id="updateAvailableRoom">
+		UPDATE room SET availableroom=#{availableroom}, todayroom=#{todayroom}, todaydate=#{todaydate} WHERE idroom=#{idroom}
+	</update>
+	
+	<select id="selectCountOfRoom" resultType="int">
+		SELECT COUNT(*) FROM room WHERE nameroom IS NOT NULL
+	</select>
+	
+	<select id="selectRoomByIdForUpdate" resultType="com.yxy.tspaceX.bean.Room">
+		SELECT * FROM room WHERE idroom=#{idroom} AND nameroom IS NOT NULL
+	</select>
+	
+	<update id="updateRoomById">
+		UPDATE room SET schoolroom=#{schoolroom}, nameroom=#{nameroom}, addressroom=#{addressroom}, capacityroom=#{capacityroom}, typeroom=#{typeroom}, pictureroom=#{pictureroom}, thumbnailroom=#{thumbnailroom}, descriptionroom=#{descriptionroom} WHERE idroom=#{idroom}
+	</update>
+	
+	<!-- 将nameroom设为NULL，表示房间被删除，不再被使用 -->
+	<update id="deleteRoomById">
+		 UPDATE room SET nameroom=NULL WHERE idroom=#{idroom}
+	</update>
+	
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <!-- MyBatis和Spring结合，environments直接在Spring配置文件中进行配置 -->
+    
+    <settings>
+    	<setting name="cacheEnabled" value="true"></setting>
+    	<!-- 配置sql日志输出，输出到控制台 -->
+    	<setting name="logImpl" value="LOG4J2"></setting>
+    </settings>
+</configuration>

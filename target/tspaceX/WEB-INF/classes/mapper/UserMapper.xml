@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxy.tspaceX.dao.UserDao">   <!-- 命名空间，名字可以随意起，只要不冲突即可 -->
+    <!-- 对象映射，可以不写 -->
+    <!-- 查询功能，resultType 设置返回值类型 -->
+    <select id="selectAll" resultType="map">  <!-- 书写 SQL 语句 -->
+        SELECT us.*, school.schoolname FROM (SELECT * FROM user WHERE (username LIKE "%${searchentry}%" OR name LIKE "%${searchentry}%") AND username IS NOT NULL) AS us LEFT JOIN school ON us.school = school.idschool LIMIT #{start}, #{size}
+    </select>
+    
+    <select id="selectUserByUsername" resultType="map">
+    	SELECT us.*, school.schoolname FROM (SELECT * FROM user WHERE username=#{username}) AS us LEFT JOIN school ON us.school = school.idschool
+    </select>
+    
+    <select id="selectUserByMobile" resultType="map">
+    	SELECT us.*, school.schoolname FROM (SELECT * FROM user WHERE mobile=#{mobile}) AS us LEFT JOIN school ON us.school = school.idschool
+    </select>
+    
+    <update id="updateUserPassword">
+    	UPDATE user SET password=#{password} WHERE username=#{username}
+    </update>
+    
+    <!-- 设置返回主键 -->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="iduser">
+    	INSERT INTO user (iduser,username,mobile,identification,name,password,school,identity) VALUES(#{iduser},#{username},#{mobile},#{identification},#{name},#{password},#{school},#{identity})
+    </insert>
+    
+    <!-- <select id="calladdproc" statementType="CALLABLE">
+    	{
+    		由于add与mysql中关键词冲突，所以在调用存储过程时，必须使用``符号标明
+    		CALL `add`(
+    		#{a, mode=IN}, 
+    		#{b, mode=IN},
+    		#{c, mode=OUT, jdbcType=INTEGER}
+    		)
+    	}
+    </select> -->
+    
+    <select id="selectCountOfUser" resultType="int">
+    	SELECT COUNT(*) FROM user WHERE username IS NOT NULL
+    </select>
+    
+    <delete id="updateUsernameNullByMobile">
+    	UPDATE user SET username=null WHERE mobile=#{mobile}
+    </delete>
+    
+    <insert id="insertUserIntoBlackList">
+    	INSERT INTO blacklist (idblacklist, mobile) VALUES(null, #{mobile})
+    </insert>
+    
+    <select id="selectCountOfUserByCondition" resultType="int">
+    	SELECT COUNT(*) FROM user WHERE (username LIKE "%${searchentry}%" OR name LIKE "%${searchentry}%") AND username IS NOT NULL
+    </select>
+    
+    <!-- 
+    	recordtype
+    	0：登录
+    	1：注册
+    	2：删除
+     -->
+    <insert id="insertUserRecord">
+    	INSERT INTO record (idrecord, recordtype, recorddate, recorduser) VALUES(null, #{recordtype}, #{recorddate}, #{recorduser})
+    </insert>
+</mapper>
