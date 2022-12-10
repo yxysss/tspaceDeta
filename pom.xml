@@ -20,7 +20,7 @@
     <!-- spring5 貌似有问题 -->
     <!-- RequestHttpHandler -->
     <!-- dispatchservlet 无法初始化 -->
-    <spring.version>4.3.14.RELEASE</spring.version>
+    <spring.version>6.0.0</spring.version>
     <mybatis.version>3.4.6</mybatis.version>
   </properties>
 
